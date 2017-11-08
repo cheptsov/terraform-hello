@@ -1,5 +1,10 @@
+import json
+
+
 def say_hello(event, context):
-    message = 'Hello, {}!'.format(event['name'])
+    message = 'Hello, {}!'.format(event["queryStringParameters"]['name'])
     return {
-        'message': message
+        "statusCode": 200,
+        "isBase64Encoded": False,
+        'body': json.dumps({"message": message})
     }
