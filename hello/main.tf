@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "hello_iam" {
 }
 
 resource "aws_iam_role" "role" {
-  name = "hello_lambda"
+  name = "${var.prefix}_hello_lambda"
   assume_role_policy = "${data.aws_iam_policy_document.hello_iam.json}"
 }
 
@@ -24,7 +24,7 @@ resource "aws_lambda_function" "hello" {
   filename         = "${data.archive_file.zip.output_path}"
   source_code_hash = "${data.archive_file.zip.output_base64sha256}"
 
-  function_name    = "hello"
+  function_name    = "${var.prefix}_hello"
   role             = "${aws_iam_role.role.arn}"
   handler          = "hello.say_hello"
   runtime          = "python3.6"
@@ -34,7 +34,7 @@ resource "aws_lambda_function" "hello" {
 }
 
 resource "aws_api_gateway_rest_api" "hello_api" {
-  name        = "api"
+  name        = "${var.prefix}_api"
 }
 
 resource "aws_api_gateway_resource" "hello_resource" {
@@ -67,7 +67,7 @@ resource "aws_api_gateway_deployment" "hello_deployment" {
     "aws_lambda_permission.hello_method_get"
   ]
   rest_api_id = "${aws_api_gateway_rest_api.hello_api.id}"
-  stage_name = "api"
+  stage_name = "${var.prefix}_api"
 }
 
 resource "aws_lambda_permission" "hello_method_get" {
