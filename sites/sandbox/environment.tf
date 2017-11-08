@@ -11,3 +11,9 @@ provider "aws" {
   region = "eu-central-1"
   profile = "jetbrains-sandbox"
 }
+
+provider "aws" {
+  region = "us-east-1"
+  alias = "us_east_1"
+  profile = "jetbrains-sandbox"
+}
