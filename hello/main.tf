@@ -1,9 +1,3 @@
-data "archive_file" "hello_zip" {
-  output_path = "${path.root}/../../out/lambda.zip"
-  source_dir = "${path.root}/../../lambda/src"
-  type = "zip"
-}
-
 data "aws_iam_policy_document" "hello_iam" {
   statement {
     actions = [ "sts:AssumeRole"]
@@ -20,14 +14,26 @@ resource "aws_iam_role" "hello_role" {
   assume_role_policy = "${data.aws_iam_policy_document.hello_iam.json}"
 }
 
+resource "null_resource" "hello_fat_jar" {
+  triggers {
+    always = "${uuid()}"
+  }
+
+  provisioner "local-exec" {
+    command = "gradle fatJar --project-dir ../../hello/lambda/"
+  }
+}
+
 resource "aws_lambda_function" "hello_lamda_function" {
-  filename         = "${data.archive_file.hello_zip.output_path}"
-  source_code_hash = "${data.archive_file.hello_zip.output_base64sha256}"
+  depends_on = ["null_resource.hello_fat_jar"]
+
+  filename         = "${var.lambda_payload_filename}"
+  source_code_hash = "${base64sha256(file(var.lambda_payload_filename))}"
 
   function_name    = "${var.prefix}_hello"
   role             = "${aws_iam_role.hello_role.arn}"
-  handler          = "hello.say_hello"
-  runtime          = "python3.6"
+  handler          = "${var.lambda_function_handler}"
+  runtime          = "${var.lambda_runtime}"
 
   timeout     = "30"
   memory_size = "128"
