@@ -1,0 +1,21 @@
+import com.roku.henka.TerraformTask
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.roku:henka:0.9.7"
+    }
+}
+
+task terraform(type: TerraformTask, dependsOn: ":hello:lambda:fatJar") {
+    tfDir = "$projectDir/sites/sandbox"
+    tfAction = "plan"
+
+    tfVarFile = "$projectDir/no.vars"
+    tfConfS3Bucket = "hello.tfstate"
+    tfConfS3Key = "terraform.tfstate"
+    tfConfS3Region = "eu-central-1"
+    tfConfS3KmsKey = "tf-state-key"
+}
